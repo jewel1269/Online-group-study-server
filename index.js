@@ -14,7 +14,7 @@ app.use(cors())
 
 console.log(process.env.DB_USER);
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.0supnyg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -54,10 +54,14 @@ app.post("/submittedAssignment", async(req, res)=>{
   
 })
 
+
+
 app.get("/assignments", async(req, res)=>{
   const result = await assignmentCollection.find().toArray();
   res.send(result)
 })
+
+
 
 app.get("/submittedAssignment", async(req, res)=>{
   const result = await submittedAssignment.find().toArray();
@@ -65,45 +69,101 @@ app.get("/submittedAssignment", async(req, res)=>{
 })
 
 
-app.get("/assignments/:email", async (req, res) => {
-  console.log(req.params.email)
-  const result = await assignmentCollection.find({email: req.params.email}).toArray();
+app.get("/submittedAssignment/:email", async (req, res) => {
+  const result = await submittedAssignment.find({email: req.params.email}).toArray();
   res.send(result);
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+app.delete("/submittedAssignment/:id", async (req, res) => {
+  const id = req.params.id;
+  
+  const query = { _id: new ObjectId(id) };
+  const result = await submittedAssignment.deleteOne(query);
+  res.send(result);
+});
+
+
+
+
 app.delete("/assignments/:email", async (req, res) => {
   const email = req.params.email;
-  console.log(email)
+  
   const query = { email: email };
   const result = await assignmentCollection.deleteOne(query);
   res.send(result);
 });
-// app.put("/countries/:id", async(req, res)=>{
-//   const id = req.params.id
-//   const filter= { _id: new ObjectId(id)}
-//   const options = {upsert: true};
-//   const updateData = req.body;
-//   console.log(updateData)
-//   const updateCountries ={
-//     $set:{
-//       name:updateData.name,
-//       userEmail:updateData.userEmail,
-//       photoURL:updateData.photoURL,
-//       spot_name:updateData.spot_name,
-//       country_name:updateData.country_name,
-//       price:updateData.price,
-//       season:updateData.season,
-//       travelTime:updateData.travelTime,
-//       visitor:updateData.visitor,
-//       description:updateData.description,
-//     }
+
+app.put("/assignments/:id", async(req, res)=>{
+  const id = req.params.id
+  const filter= { _id: new ObjectId(id)}
+  const options = {upsert: true};
+  const updateData = req.body;
+  console.log(updateData)
+  const updateCountries ={
+    $set:{
+      title:updateData.title,
+      photoURL:updateData.photoURL,
+      marks:updateData.marks,
+      difficultyLevel: updateData.difficultyLevel,
+      date: updateData.date,
+      descriptions:updateData.descriptions,
+    }
     
-//   }
-//   const result = await countryCollection.updateOne(filter, updateCountries, options);
-//   console.log(result)
-//   res.send(result)
+  }
+  const result = await assignmentCollection.updateOne(filter, updateCountries, options);
+  console.log(result)
+  res.send(result)
   
-// })
+})
+
+
+
+
+
+
+
+
+
+
+
+app.post("/submittedAssignment/:id", async (req, res) => {
+  const id = req.params.id;
+  const obtainedValue = req.body.obtained; // Assuming obtained value is sent in the request body
+
+  try {
+    const result = await submittedAssignment.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { obtained: { obtainedValue } } } // Use $set to update the entire object field
+    );
+
+    if (result.modifiedCount === 1) {
+      console.log('Data added successfully');
+      res.status(200).send('Data added successfully');
+    } else {
+      console.log('Document not found');
+      res.status(404).send('Document not found');
+    }
+  } catch (err) {
+    console.error('Error adding data:', err);
+    res.status(500).send('Error adding data');
+  }
+});
+
+
+
+   
 
 
 
