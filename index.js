@@ -15,7 +15,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "http://localhost:5174"
+      "http://localhost:5174",
+      "http://localhost:5175"
     ],
     credentials: true,
   })
@@ -88,14 +89,14 @@ app.post("/submittedAssignment", async(req, res)=>{
 
 
 
-app.get("/assignments", logger, verifyToken, async(req, res)=>{
+app.get("/assignments", async(req, res)=>{
   const result = await assignmentCollection.find().toArray();
   res.send(result)
 })
 
 
 
-app.get("/submittedAssignment", logger, verifyToken, async(req, res)=>{
+app.get("/submittedAssignment", logger, verifyToken,  async(req, res)=>{
   const result = await submittedAssignment.find().toArray();
   res.send(result)
 })
@@ -105,20 +106,6 @@ app.get("/submittedAssignment/:email", logger, verifyToken, async (req, res) => 
   const result = await submittedAssignment.find({email: req.params.email}).toArray();
   res.send(result);
 });
-
-
-app.patch("/submittedAssignment/:id", async(req, res)=>{
-  const updateStatus = req.body;
-  console.log(updateStatus);
-  
-})
-
-
-
-
-
-
-
 
 
 
@@ -169,23 +156,20 @@ app.put("/assignments/:id",  async(req, res)=>{
 
 
 
-
-
-
-
 app.post("/jwt", async (req, res) => {
   try {
     const user = req.body;
     console.log(user);
 
     const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '1h'
+      expiresIn: '7d'
     });
+    console.log(token);
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: true, // Set to true if using HTTPS
-      sameSite: 'none' // For cross-site requests
+      secure: true, 
+      sameSite: 'none' 
     }).send({ success: true });
   } catch (error) {
     console.error('Error generating JWT:', error);
