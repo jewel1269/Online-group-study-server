@@ -186,11 +186,22 @@ app.post("/jwt", async (req, res) => {
 
 
 
- app.post("/submittedAssignment/:id", async (req, res) => {
+app.post("/submittedAssignment/:id", async (req, res) => {
   const id = req.params.id;
-  const { obtained, status, appreciate } = req.body; // Assuming obtained, status, and appreciate values are sent in the request body
+  const { obtained, status, appreciate } = req.body; 
 
   try {
+   
+    const existingAssignment = await submittedAssignment.findOne({ _id: new ObjectId(id) });
+    const prevObtained = existingAssignment.obtained;
+    const marks = existingAssignment.marks;
+
+
+    if (obtained > marks || obtained <= prevObtained) {
+      console.log('New obtained value should be less than or equal to marks and greater than the previous value');
+      return res.status(400).send('New obtained value should be less than or equal to marks and greater than the previous value');
+    }
+
     const result = await submittedAssignment.updateOne(
       { _id: new ObjectId(id) },
       { 
@@ -203,15 +214,15 @@ app.post("/jwt", async (req, res) => {
     );
 
     if (result.modifiedCount === 1) {
-      console.log('Data added successfully');
-      res.status(200).send('Data added successfully');
+      console.log('Data updated successfully');
+      return res.status(200).send('Data updated successfully');
     } else {
       console.log('Document not found');
-      res.status(404).send('Document not found');
+      return res.status(404).send('Document not found');
     }
   } catch (err) {
-    console.error('Error adding data:', err);
-    res.status(500).send('Error adding data');
+    console.error('Error updating data:', err);
+    return res.status(500).send('Error updating data');
   }
 });
 
