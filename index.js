@@ -75,6 +75,12 @@ app.get("/submittedAssignment/:email", async (req, res) => {
 });
 
 
+app.patch("/submittedAssignment/:id", async(req, res)=>{
+  const updateStatus = req.body;
+  console.log(updateStatus);
+  
+})
+
 
 
 
@@ -153,14 +159,20 @@ app.post("/jwt", async(req, res)=>{
 
 
 
-app.post("/submittedAssignment/:id", async (req, res) => {
+ app.post("/submittedAssignment/:id", async (req, res) => {
   const id = req.params.id;
-  const obtainedValue = req.body.obtained; // Assuming obtained value is sent in the request body
+  const { obtained, status, appreciate } = req.body; // Assuming obtained, status, and appreciate values are sent in the request body
 
   try {
     const result = await submittedAssignment.updateOne(
       { _id: new ObjectId(id) },
-      { $set: { obtained: { obtainedValue } } } // Use $set to update the entire object field
+      { 
+        $set: { 
+          obtained: obtained,
+          status: status,
+          appreciate: appreciate
+        } 
+      }
     );
 
     if (result.modifiedCount === 1) {
