@@ -89,11 +89,6 @@ app.post("/submittedAssignment", async(req, res)=>{
 
 
 
-app.get("/assignments", async(req, res)=>{
-  const result = await assignmentCollection.find().toArray();
-  res.send(result)
-})
-
 
 
 app.get("/submittedAssignment", logger, verifyToken,  async(req, res)=>{
@@ -179,8 +174,14 @@ app.post("/jwt", async (req, res) => {
 
 
 
-
-
+app.get('/assignments', async (req, res) => {
+  const  filter = req.query.filter
+  console.log(filter);
+  let query={}
+  if(filter) query ={ difficultyLevel: filter}
+  const result = await assignmentCollection.find(query).toArray()
+  res.send(result)
+});
 
 
 
@@ -225,6 +226,7 @@ app.post("/submittedAssignment/:id", async (req, res) => {
     return res.status(500).send('Error updating data');
   }
 });
+
 
 
 
