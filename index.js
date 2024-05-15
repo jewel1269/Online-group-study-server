@@ -16,7 +16,9 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "http://localhost:5175"
+      "http://localhost:5175",
+      "https://online-group-study-41ffa.web.app",
+      "https://online-group-study-41ffa.firebaseapp.com"
     ],
     credentials: true,
   })
@@ -58,6 +60,12 @@ jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded)=>{
   next();
 })
 };
+
+const cookieOptions={
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "Production" ? "none" : "strict", 
+  sameSite: process.env.NODE_ENV === "Production" ? true : false ,
+}
 
 async function run() {
   try {
@@ -161,11 +169,7 @@ app.post("/jwt", async (req, res) => {
     });
     console.log(token);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true, 
-      sameSite: 'none' 
-    }).send({ success: true });
+    res.cookie('token', token, cookieOptions).send({ success: true });
   } catch (error) {
     console.error('Error generating JWT:', error);
     res.status(500).send({ success: false, error: 'Internal server error' });
@@ -181,7 +185,7 @@ app.post("/logout", async (req, res) => {
 });
 
 
-
+  
 app.get('/assignments', async (req, res) => {
   const  filter = req.query.filter
   console.log(filter);
