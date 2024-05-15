@@ -172,6 +172,14 @@ app.post("/jwt", async (req, res) => {
   }
 });
 
+app.post("/logout", async (req, res) => {
+  const user = req.body;
+  console.log("logging out", user);
+  res
+    .clearCookie("token", { ...cookieOptions, maxAge: 0 })
+    .send({ success: true });
+});
+
 
 
 app.get('/assignments', async (req, res) => {
@@ -230,12 +238,8 @@ app.post("/submittedAssignment/:id", async (req, res) => {
 
 
 
-   
-
-
-
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
