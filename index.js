@@ -97,15 +97,13 @@ app.post("/submittedAssignment", async(req, res)=>{
 
 
 
-
-
-app.get("/submittedAssignment", logger, verifyToken,  async(req, res)=>{
+app.get("/submittedAssignment",   async(req, res)=>{
   const result = await submittedAssignment.find().toArray();
   res.send(result)
 })
 
 
-app.get("/submittedAssignment/:email", logger, verifyToken, async (req, res) => {
+app.get("/submittedAssignment/:email", async (req, res) => {
   const result = await submittedAssignment.find({email: req.params.email}).toArray();
   res.send(result);
 });
@@ -201,18 +199,25 @@ app.get('/assignments', async (req, res) => {
 
 app.post("/submittedAssignment/:id", async (req, res) => {
   const id = req.params.id;
-  const { obtained, status, appreciate } = req.body; 
+  const { obtained, status, appreciate, userEmail } = req.body; 
 
   try {
    
     const existingAssignment = await submittedAssignment.findOne({ _id: new ObjectId(id) });
     const prevObtained = existingAssignment.obtained;
     const marks = existingAssignment.marks;
+    const email = existingAssignment.email;
+    console.log(email);
 
 
     if (obtained > marks || obtained <= prevObtained) {
       console.log('New obtained value should be less than or equal to marks and greater than the previous value');
       return res.status(400).send('New obtained value should be less than or equal to marks and greater than the previous value');
+    }
+
+    if(email === userEmail){
+      return res.status(403).send('User cannot give marks their own assignment');
+
     }
 
     const result = await submittedAssignment.updateOne(
